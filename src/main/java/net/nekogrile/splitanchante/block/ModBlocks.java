@@ -1,6 +1,7 @@
 package net.nekogrile.splitanchante.block;
 
 import net.nekogrile.splitanchante.SplitAnchante;
+import net.nekogrile.splitanchante.block.custom.EnchantementTheft;
 import net.nekogrile.splitanchante.block.custom.GemPolishingStationBlock;
 import net.nekogrile.splitanchante.item.ModItems;
 import net.minecraft.world.item.BlockItem;
@@ -21,6 +22,10 @@ public class ModBlocks {
 
     public static final RegistryObject<Block> GEM_POLISHING_STATION = registerBlock("gem_polishing_station",
             () -> new GemPolishingStationBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK).noOcclusion()));
+
+
+    public static final RegistryObject<Block> ENCHANTEMENT_THEFT = registerBlock("anchnetement_theft",
+            () -> new EnchantementTheft(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK).noOcclusion()));
 
 
 

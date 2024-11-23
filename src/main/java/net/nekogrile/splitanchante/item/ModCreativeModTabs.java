@@ -21,9 +21,17 @@ public class ModCreativeModTabs {
                     .title(Component.translatable("creativetab.tutorial_tab"))
                     .displayItems((parameters, output) -> {
                         // Ajouter ici tous les items ou blocs que tu veux afficher dans l'onglet
+
+
                         output.accept(ModBlocks.GEM_POLISHING_STATION.get().asItem());
+                        output.accept(ModBlocks.ENCHANTEMENT_THEFT.get().asItem());
+
+
                     })
                     .build());
+
+
+
 
     public static void register(IEventBus eventBus) {
         CREATIVE_MODE_TABS.register(eventBus);

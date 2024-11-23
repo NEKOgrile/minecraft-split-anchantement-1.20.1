@@ -18,6 +18,12 @@ public class ModBlockEntities {
                             ModBlocks.GEM_POLISHING_STATION.get()).build(null));
 
 
+    public static final RegistryObject<BlockEntityType<EnchantementTheft>> ENCHANTEMED_BE =
+            BLOCK_ENTITIES.register("anchnetement_theft_be", () ->
+                    BlockEntityType.Builder.of(EnchantementTheft::new,
+                            ModBlocks.ENCHANTEMENT_THEFT.get()).build(null));
+
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }
