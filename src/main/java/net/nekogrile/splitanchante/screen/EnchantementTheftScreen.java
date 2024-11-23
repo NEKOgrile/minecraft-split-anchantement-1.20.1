@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class EnchantementTheftScreen extends AbstractContainerScreen<EnchantementTheftMenu> {
     private static final ResourceLocation TEXTURE =
-            new ResourceLocation(SplitAnchante.MOD_ID, "textures/gui/gem_polishing_station_gui.png");
+            new ResourceLocation(SplitAnchante.MOD_ID, "textures/gui/enchantement_theft_gui.png");
 
     public EnchantementTheftScreen(EnchantementTheftMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);

@@ -33,25 +33,22 @@ public class EnchantementTheftMenu extends AbstractContainerMenu {
         addPlayerHotbar(inv);
 
         this.blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(iItemHandler -> {
-            this.addSlot(new SlotItemHandler(iItemHandler, 0, 80, 11) { // Slot 0 pour les livres enchantés avec au moins 2 enchantements
+            this.addSlot(new SlotItemHandler(iItemHandler, 0, 80, 11) { // Slot 0 pour les items avec au moins un enchantement
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    if (stack.is(Items.ENCHANTED_BOOK)) {
-                        // Vérifie que le livre enchanté a au moins 2 enchantements dans le tag "StoredEnchantments"
-                        return stack.getTag() != null &&
-                                stack.getTag().getList("StoredEnchantments", 10).size() >= 2;
-                    }
-                    return false;
+                    // Vérifie si l'item a des enchantements
+                    return stack.isEnchanted();
                 }
             });
             this.addSlot(new SlotItemHandler(iItemHandler, 1, 80, 59)); // Slot 1 standard
-            this.addSlot(new SlotItemHandler(iItemHandler, 2, 60, 32) { // Slot 2 pour les livres normaux
+            this.addSlot(new SlotItemHandler(iItemHandler, 2, 56, 34) { // Slot 2 pour les livres normaux
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return stack.is(Items.BOOK); // Accepte seulement les livres non enchantés
                 }
             });
         });
+
 
 
 
@@ -145,7 +142,7 @@ public class EnchantementTheftMenu extends AbstractContainerMenu {
         ItemStack bookStack = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER)
                 .map(handler -> handler.getStackInSlot(2)) // Slot des livres
                 .orElse(ItemStack.EMPTY);
-        return bookStack.getCount() >= 2;
+        return bookStack.getCount() >= 1;
     }
 
 }

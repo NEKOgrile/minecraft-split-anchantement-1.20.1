@@ -142,39 +142,34 @@ public class EnchantementTheft extends BlockEntity implements MenuProvider {
         ItemStack outputStack = this.itemHandler.getStackInSlot(OUTPUT_SLOT);
         ItemStack bookStack = this.itemHandler.getStackInSlot(BOOK_SLOT);
 
-        if (inputStack.is(Items.ENCHANTED_BOOK) && inputStack.getTag() != null && bookStack.getCount() > 0) {
-            // Récupère la liste des enchantements
-            var enchantments = inputStack.getTag().getList("StoredEnchantments", 10);
+        // Vérifie si l'item d'entrée est une armure ou un autre objet avec des enchantements
+        if (inputStack.isEnchanted() && bookStack.getCount() > 0) {
+            // Récupère tous les enchantements de l'armure
+            var enchantments = inputStack.getEnchantmentTags();
 
             if (!enchantments.isEmpty()) {
-                // Extrait le premier enchantement
-                var firstEnchantment = enchantments.getCompound(0);
-
-                // Crée un livre enchanté avec cet enchantement
+                // Crée un livre enchanté contenant tous les enchantements
                 ItemStack newEnchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
-                newEnchantedBook.addTagElement("StoredEnchantments", new net.minecraft.nbt.ListTag());
-                newEnchantedBook.getTag().getList("StoredEnchantments", 10).add(firstEnchantment);
+                newEnchantedBook.addTagElement("StoredEnchantments", enchantments.copy());
 
-                // Place le livre enchanté dans le slot de sortie s'il est vide
+                // Place le livre enchanté dans le slot de sortie
                 if (outputStack.isEmpty()) {
                     this.itemHandler.setStackInSlot(OUTPUT_SLOT, newEnchantedBook);
                 } else {
-                    outputStack.getTag().getList("StoredEnchantments", 10).add(firstEnchantment);
+                    // Si un livre existe déjà dans la sortie, fusionne les enchantements
+                    var outputEnchantments = outputStack.getOrCreateTag().getList("StoredEnchantments", 10);
+                    for (int i = 0; i < enchantments.size(); i++) {
+                        outputEnchantments.add(enchantments.get(i));
+                    }
+                    outputStack.getTag().put("StoredEnchantments", outputEnchantments);
                     this.itemHandler.setStackInSlot(OUTPUT_SLOT, outputStack);
                 }
 
-                // Supprime le premier enchantement du livre d'entrée
-                enchantments.remove(0);
-                if (enchantments.isEmpty()) {
-                    // Si plus d'enchantements, retire le livre
-                    this.itemHandler.setStackInSlot(INPUT_SLOT, ItemStack.EMPTY);
-                } else {
-                    // Met à jour le livre d'entrée avec les enchantements restants
-                    inputStack.getTag().put("StoredEnchantments", enchantments);
-                    this.itemHandler.setStackInSlot(INPUT_SLOT, inputStack);
-                }
+                // Supprime tous les enchantements de l'objet d'entrée
+                inputStack.removeTagKey("Enchantments");
+                this.itemHandler.setStackInSlot(INPUT_SLOT, inputStack);
 
-                // Consomme un livre normal du slot de livres (BOOK_SLOT)
+                // Consomme un livre normal du slot de livres
                 bookStack.shrink(1);
                 this.itemHandler.setStackInSlot(BOOK_SLOT, bookStack);
             }
@@ -182,21 +177,21 @@ public class EnchantementTheft extends BlockEntity implements MenuProvider {
     }
 
 
+
     private boolean hasRecipe() {
         ItemStack inputStack = this.itemHandler.getStackInSlot(INPUT_SLOT);
-        boolean hasEnchantedBookWithEnchantments = inputStack.is(Items.ENCHANTED_BOOK) &&
-                inputStack.getTag() != null &&
-                inputStack.getTag().getList("StoredEnchantments", 10).size() > 0; // Vérifie qu'il y a au moins un enchantement
+        boolean hasItemWithEnchantments = inputStack.isEnchanted(); // Vérifie si l'item a des enchantements
 
-        boolean hasEnoughBooks = this.itemHandler.getStackInSlot(BOOK_SLOT).getCount() >= 2;
+        boolean hasEnoughBooks = this.itemHandler.getStackInSlot(BOOK_SLOT).getCount() >= 1; // Besoin d'un livre
         boolean isStandardBook = this.itemHandler.getStackInSlot(BOOK_SLOT).getItem() == Items.BOOK; // Vérifie si c'est un livre simple
 
         ItemStack result = new ItemStack(Items.ENCHANTED_BOOK);
 
-        return hasEnchantedBookWithEnchantments && hasEnoughBooks && isStandardBook &&
+        return hasItemWithEnchantments && hasEnoughBooks && isStandardBook &&
                 canInsertAmountIntoOutputSlot(result.getCount()) &&
                 canInsertItemIntoOutputSlot(result.getItem());
     }
+
 
 
     private boolean canInsertItemIntoOutputSlot(Item item) {
