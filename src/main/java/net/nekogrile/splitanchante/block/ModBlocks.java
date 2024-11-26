@@ -25,7 +25,7 @@ public class ModBlocks {
 
 
     public static final RegistryObject<Block> ENCHANTEMENT_THEFT = registerBlock("anchnetement_theft",
-            () -> new EnchantementTheft(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK).noOcclusion()));
+            () -> new EnchantementTheft(BlockBehaviour.Properties.copy(Blocks.OAK_WOOD)));
 
 
 

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "#5#",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:book"
+    },
+    "5": {
+      "item": "minecraft:emerald"
+    }
+  },
+  "result": {
+    "item": "splitanchante:anchnetement_theft"
+  }
+}

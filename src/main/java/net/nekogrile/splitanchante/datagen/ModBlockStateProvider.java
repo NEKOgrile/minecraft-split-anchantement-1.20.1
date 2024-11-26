@@ -22,7 +22,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 new ModelFile.UncheckedModelFile(modLoc("block/gem_polishing_station")));
 
         simpleBlockWithItem(ModBlocks.ENCHANTEMENT_THEFT.get(),
-                new ModelFile.UncheckedModelFile(modLoc("block/gem_polishing_station")));
+                new ModelFile.UncheckedModelFile(modLoc("block/anchnetement_theft")));
     }
 
 
