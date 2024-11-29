@@ -21,11 +21,11 @@ public class ModBlocks {
 
 
     public static final RegistryObject<Block> GEM_POLISHING_STATION = registerBlock("gem_polishing_station",
-            () -> new GemPolishingStationBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK).noOcclusion()));
+            () -> new GemPolishingStationBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WOOD).lightLevel(state -> 10).strength(2.0f, 6.0f)));
 
 
     public static final RegistryObject<Block> ENCHANTEMENT_THEFT = registerBlock("anchnetement_theft",
-            () -> new EnchantementTheft(BlockBehaviour.Properties.copy(Blocks.OAK_WOOD)));
+            () -> new EnchantementTheft(BlockBehaviour.Properties.copy(Blocks.OAK_WOOD) .lightLevel(state -> 10).strength(2.0f, 6.0f)));
 
 
 

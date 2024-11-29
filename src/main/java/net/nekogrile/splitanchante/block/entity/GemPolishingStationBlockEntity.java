@@ -27,7 +27,23 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class GemPolishingStationBlockEntity extends BlockEntity implements MenuProvider {
-    private final ItemStackHandler itemHandler = new ItemStackHandler(3); // Trois slots
+    private final ItemStackHandler itemHandler = new ItemStackHandler(3) {
+        @Override
+        protected void onContentsChanged(int slot) {
+            setChanged();
+        }
+
+        @Override
+        public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+            // Contrôle des slots
+            return switch (slot) {
+                case 0 -> stack.isEnchanted(); // INPUT : accepte uniquement des items enchantés
+                case 1 -> false; // OUTPUT : aucun item ne peut être placé
+                case 2 -> stack.is(Items.BOOK); // BOOK : accepte uniquement des livres normaux
+                default -> false;
+            };
+        }
+    };
 
     private static final int INPUT_SLOT = 0;
     private static final int OUTPUT_SLOT = 1;
@@ -42,6 +58,12 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
     public GemPolishingStationBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntities.GEM_POLISHING_BE.get(), pPos, pBlockState);
         this.data = new ContainerData() {
+
+
+
+
+
+
             @Override
             public int get(int pIndex) {
                 return switch (pIndex) {
