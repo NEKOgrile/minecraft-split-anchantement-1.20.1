@@ -37,7 +37,7 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
         public boolean isItemValid(int slot, @NotNull ItemStack stack) {
             // Contrôle des slots
             return switch (slot) {
-                case 0 -> stack.isEnchanted(); // INPUT : accepte uniquement des items enchantés
+                case 0 -> stack.is(Items.ENCHANTED_BOOK); // INPUT : accepte uniquement des livres enchantés
                 case 1 -> false; // OUTPUT : aucun item ne peut être placé
                 case 2 -> stack.is(Items.BOOK); // BOOK : accepte uniquement des livres normaux
                 default -> false;
@@ -50,6 +50,7 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
     private static final int BOOK_SLOT = 2;
 
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
+    private LazyOptional<IItemHandler> hopperHandler = LazyOptional.empty();
 
     protected final ContainerData data;
     private int progress = 0;
@@ -58,12 +59,6 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
     public GemPolishingStationBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntities.GEM_POLISHING_BE.get(), pPos, pBlockState);
         this.data = new ContainerData() {
-
-
-
-
-
-
             @Override
             public int get(int pIndex) {
                 return switch (pIndex) {
@@ -91,6 +86,9 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
         if (cap == ForgeCapabilities.ITEM_HANDLER) {
+            if (side == Direction.DOWN) {
+                return hopperHandler.cast();
+            }
             return lazyItemHandler.cast();
         }
         return super.getCapability(cap, side);
@@ -99,13 +97,54 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
     @Override
     public void onLoad() {
         super.onLoad();
-        lazyItemHandler = LazyOptional.of(() -> itemHandler); // Initialisation du lazyItemHandler
+        lazyItemHandler = LazyOptional.of(() -> itemHandler);
+        hopperHandler = LazyOptional.of(() -> new ItemStackHandler(3) {
+            @Override
+            public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+                return false; // Les hoppers ne doivent pas insérer d'items.
+            }
+
+            @Override
+            @NotNull
+            public ItemStack extractItem(int slot, int amount, boolean simulate) {
+                if (slot == INPUT_SLOT) {
+                    ItemStack inputStack = itemHandler.getStackInSlot(INPUT_SLOT);
+                    if (isSingleEnchantedBook(inputStack)) {
+                        return itemHandler.extractItem(INPUT_SLOT, amount, simulate);
+                    }
+                    return ItemStack.EMPTY; // Bloque l'extraction si la condition n'est pas remplie
+                }
+                if (slot == OUTPUT_SLOT) {
+                    return itemHandler.extractItem(slot, amount, simulate);
+                }
+                return ItemStack.EMPTY; // Bloque l'extraction pour les autres slots
+            }
+
+            @Override
+            public int getSlots() {
+                return 3;
+            }
+
+            @Override
+            public ItemStack getStackInSlot(int slot) {
+                return itemHandler.getStackInSlot(slot);
+            }
+        });
+    }
+
+    private boolean isSingleEnchantedBook(ItemStack stack) {
+        if (!stack.is(Items.ENCHANTED_BOOK) || stack.getTag() == null) {
+            return false; // Pas un livre enchanté ou pas de NBT
+        }
+        var enchantments = stack.getTag().getList("StoredEnchantments", 10);
+        return enchantments.size() == 1; // Vérifie qu'il y a exactement un enchantement
     }
 
     @Override
     public void invalidateCaps() {
         super.invalidateCaps();
         lazyItemHandler.invalidate();
+        hopperHandler.invalidate();
     }
 
     public void drops() {
@@ -164,24 +203,28 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
         ItemStack outputStack = this.itemHandler.getStackInSlot(OUTPUT_SLOT);
         ItemStack bookStack = this.itemHandler.getStackInSlot(BOOK_SLOT);
 
-        if (inputStack.is(Items.ENCHANTED_BOOK) && inputStack.getTag() != null && bookStack.getCount() > 0) {
-            // Récupère la liste des enchantements
+        if (inputStack.is(Items.ENCHANTED_BOOK) && inputStack.hasTag() && bookStack.getCount() > 0) {
+            // Récupère la liste des enchantements du livre d'entrée
             var enchantments = inputStack.getTag().getList("StoredEnchantments", 10);
 
             if (!enchantments.isEmpty()) {
-                // Extrait le premier enchantement
+                // Récupère le premier enchantement
                 var firstEnchantment = enchantments.getCompound(0);
 
-                // Crée un livre enchanté avec cet enchantement
+                // Crée un nouveau livre enchanté avec cet enchantement
                 ItemStack newEnchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
-                newEnchantedBook.addTagElement("StoredEnchantments", new net.minecraft.nbt.ListTag());
-                newEnchantedBook.getTag().getList("StoredEnchantments", 10).add(firstEnchantment);
+                var newEnchantmentList = new net.minecraft.nbt.ListTag();
+                newEnchantmentList.add(firstEnchantment);
+                newEnchantedBook.addTagElement("StoredEnchantments", newEnchantmentList);
 
-                // Place le livre enchanté dans le slot de sortie s'il est vide
+                // Place le nouveau livre enchanté dans le slot de sortie
                 if (outputStack.isEmpty()) {
                     this.itemHandler.setStackInSlot(OUTPUT_SLOT, newEnchantedBook);
-                } else {
-                    outputStack.getTag().getList("StoredEnchantments", 10).add(firstEnchantment);
+                } else if (outputStack.is(Items.ENCHANTED_BOOK)) {
+                    // Combine avec le livre existant dans l'output (si déjà présent)
+                    var existingEnchantments = outputStack.getTag().getList("StoredEnchantments", 10);
+                    existingEnchantments.add(firstEnchantment);
+                    outputStack.getTag().put("StoredEnchantments", existingEnchantments);
                     this.itemHandler.setStackInSlot(OUTPUT_SLOT, outputStack);
                 }
 
@@ -196,7 +239,7 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
                     this.itemHandler.setStackInSlot(INPUT_SLOT, inputStack);
                 }
 
-                // Consomme un livre normal du slot de livres (BOOK_SLOT)
+                // Consomme un livre normal dans le slot de livres
                 bookStack.shrink(1);
                 this.itemHandler.setStackInSlot(BOOK_SLOT, bookStack);
             }
@@ -206,28 +249,19 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
 
     private boolean hasRecipe() {
         ItemStack inputStack = this.itemHandler.getStackInSlot(INPUT_SLOT);
+        ItemStack bookStack = this.itemHandler.getStackInSlot(BOOK_SLOT);
+        ItemStack outputStack = this.itemHandler.getStackInSlot(OUTPUT_SLOT);
+
         boolean hasEnchantedBookWithEnchantments = inputStack.is(Items.ENCHANTED_BOOK) &&
-                inputStack.getTag() != null &&
-                inputStack.getTag().getList("StoredEnchantments", 10).size() > 0; // Vérifie qu'il y a au moins un enchantement
+                inputStack.hasTag() &&
+                inputStack.getTag().getList("StoredEnchantments", 10).size() > 0;
 
-        boolean hasEnoughBooks = this.itemHandler.getStackInSlot(BOOK_SLOT).getCount() >= 2;
-        boolean isStandardBook = this.itemHandler.getStackInSlot(BOOK_SLOT).getItem() == Items.BOOK; // Vérifie si c'est un livre simple
+        boolean hasBooks = bookStack.is(Items.BOOK) && bookStack.getCount() > 0;
+        boolean outputSlotEmptyOrMatching = outputStack.isEmpty() || outputStack.is(Items.ENCHANTED_BOOK);
 
-        ItemStack result = new ItemStack(Items.ENCHANTED_BOOK);
-
-        return hasEnchantedBookWithEnchantments && hasEnoughBooks && isStandardBook &&
-                canInsertAmountIntoOutputSlot(result.getCount()) &&
-                canInsertItemIntoOutputSlot(result.getItem());
+        return hasEnchantedBookWithEnchantments && hasBooks && outputSlotEmptyOrMatching;
     }
 
-
-    private boolean canInsertItemIntoOutputSlot(Item item) {
-        return this.itemHandler.getStackInSlot(OUTPUT_SLOT).isEmpty() || this.itemHandler.getStackInSlot(OUTPUT_SLOT).is(item);
-    }
-
-    private boolean canInsertAmountIntoOutputSlot(int count) {
-        return this.itemHandler.getStackInSlot(OUTPUT_SLOT).getCount() + count <= this.itemHandler.getStackInSlot(OUTPUT_SLOT).getMaxStackSize();
-    }
 
     private boolean hasProgressFinished() {
         return progress >= maxProgress;
