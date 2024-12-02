@@ -23,6 +23,11 @@ public class ModBlockEntities {
                     BlockEntityType.Builder.of(EnchantementTheft::new,
                             ModBlocks.ENCHANTEMENT_THEFT.get()).build(null));
 
+    public static final RegistryObject<BlockEntityType<TheBibiliothequeEntity>> BIBILIOTHEQUE_BE =
+            BLOCK_ENTITIES.register("bibiliotheque", () ->
+                    BlockEntityType.Builder.of(TheBibiliothequeEntity::new,
+                            ModBlocks.BIBILIOTHE.get()).build(null));
+
 
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);

@@ -23,6 +23,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         simpleBlockWithItem(ModBlocks.ENCHANTEMENT_THEFT.get(),
                 new ModelFile.UncheckedModelFile(modLoc("block/anchnetement_theft")));
+
+        simpleBlockWithItem(ModBlocks.BIBILIOTHE.get(),
+                new ModelFile.UncheckedModelFile(modLoc("block/bibiliotheque")));
     }
 
 

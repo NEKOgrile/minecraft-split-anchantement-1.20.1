@@ -4,9 +4,7 @@ import net.nekogrile.splitanchante.block.ModBlocks;
 import net.nekogrile.splitanchante.block.entity.ModBlockEntities;
 import net.nekogrile.splitanchante.item.ModCreativeModTabs;
 import net.nekogrile.splitanchante.item.ModItems;
-import net.nekogrile.splitanchante.screen.EnchantementTheftScreen;
-import net.nekogrile.splitanchante.screen.GemPolishingStationScreen;
-import net.nekogrile.splitanchante.screen.ModMenuTypes;
+import net.nekogrile.splitanchante.screen.*;
 import net.nekogrile.splitanchante.sound.ModSounds;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -70,6 +68,8 @@ public class SplitAnchante {
 
             MenuScreens.register(ModMenuTypes.GEM_POLISHING_MENU.get(), GemPolishingStationScreen::new);
             MenuScreens.register(ModMenuTypes.ENCHANTEMENT_THEFT_MENU.get(), EnchantementTheftScreen::new);
+            MenuScreens.register(ModMenuTypes.BIBILIOTHEQUE_MENU.get(), TheBibiliothequeScreen::new);
+
 
         }
     }

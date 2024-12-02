@@ -3,6 +3,7 @@ package net.nekogrile.splitanchante.block;
 import net.nekogrile.splitanchante.SplitAnchante;
 import net.nekogrile.splitanchante.block.custom.EnchantementTheft;
 import net.nekogrile.splitanchante.block.custom.GemPolishingStationBlock;
+import net.nekogrile.splitanchante.block.custom.TheBibiliothequeBlock;
 import net.nekogrile.splitanchante.item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -27,6 +28,8 @@ public class ModBlocks {
     public static final RegistryObject<Block> ENCHANTEMENT_THEFT = registerBlock("anchnetement_theft",
             () -> new EnchantementTheft(BlockBehaviour.Properties.copy(Blocks.OAK_WOOD) .lightLevel(state -> 10).strength(2.0f, 6.0f)));
 
+    public static final RegistryObject<Block> BIBILIOTHE = registerBlock("bibiliotheque",
+            () -> new TheBibiliothequeBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WOOD) .lightLevel(state -> 10).strength(2.0f, 6.0f)));
 
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {

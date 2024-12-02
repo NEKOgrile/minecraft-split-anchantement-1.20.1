@@ -25,6 +25,7 @@ public class ModCreativeModTabs {
 
                         output.accept(ModBlocks.GEM_POLISHING_STATION.get().asItem());
                         output.accept(ModBlocks.ENCHANTEMENT_THEFT.get().asItem());
+                        output.accept(ModBlocks.BIBILIOTHE.get().asItem());
 
 
                     })

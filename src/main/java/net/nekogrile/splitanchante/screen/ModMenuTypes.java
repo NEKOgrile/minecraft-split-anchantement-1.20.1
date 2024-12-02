@@ -20,6 +20,10 @@ public class ModMenuTypes {
     public static final RegistryObject<MenuType<EnchantementTheftMenu>> ENCHANTEMENT_THEFT_MENU =
             registerMenuType("enchantement_theft_menu", EnchantementTheftMenu::new);
 
+    public static final RegistryObject<MenuType<TheBibiliothequeMenu>> BIBILIOTHEQUE_MENU =
+            registerMenuType("bibiliotheque_menu", TheBibiliothequeMenu::new);
+
+
     private static <T extends AbstractContainerMenu>RegistryObject<MenuType<T>> registerMenuType(String name, IContainerFactory<T> factory) {
         return MENUS.register(name, () -> IForgeMenuType.create(factory));
     }
