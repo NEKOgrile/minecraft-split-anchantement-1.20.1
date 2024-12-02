@@ -87,12 +87,45 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
         if (cap == ForgeCapabilities.ITEM_HANDLER) {
             if (side == Direction.DOWN) {
+                // Extraction uniquement pour le slot OUTPUT
                 return hopperHandler.cast();
+            } else if (side == Direction.NORTH || side == Direction.SOUTH || side == Direction.EAST || side == Direction.WEST) {
+                // Hoppers sur les côtés interagissent avec le BOOK_SLOT
+                return LazyOptional.of(() -> new ItemStackHandler(3) {
+                    @Override
+                    public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+                        if (slot == BOOK_SLOT && stack.is(Items.BOOK)) {
+                            return itemHandler.insertItem(BOOK_SLOT, stack, simulate);
+                        }
+                        return stack; // Refuse tout autre item
+                    }
+
+                    @Override
+                    public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
+                        return ItemStack.EMPTY; // Empêche l'extraction par les hoppers sur les côtés
+                    }
+
+                    @Override
+                    public int getSlots() {
+                        return 3;
+                    }
+
+                    @Override
+                    public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+                        return slot == BOOK_SLOT && stack.is(Items.BOOK); // Vérifie uniquement les livres normaux
+                    }
+
+                    @Override
+                    public @NotNull ItemStack getStackInSlot(int slot) {
+                        return itemHandler.getStackInSlot(slot);
+                    }
+                }).cast();
             }
-            return lazyItemHandler.cast();
+            return lazyItemHandler.cast(); // Par défaut, retourne l'accès complet
         }
         return super.getCapability(cap, side);
     }
+
 
     @Override
     public void onLoad() {
@@ -261,7 +294,6 @@ public class GemPolishingStationBlockEntity extends BlockEntity implements MenuP
 
         return hasEnchantedBookWithEnchantments && hasBooks && outputSlotEmptyOrMatching;
     }
-
 
     private boolean hasProgressFinished() {
         return progress >= maxProgress;
